@@ -1,5 +1,7 @@
 from http import HTTPStatus
 
+from fastapi_zero.schemas import UserPublic
+
 
 def test_read_root_return_OK_and_message(client):
     response = client.get('/')  # Act
@@ -69,6 +71,24 @@ def test_update_user_NOT_FOUND(client):
             'password': 'senha.123',
         },
     )
+
+    assert response.status_code == HTTPStatus.NOT_FOUND
+    assert response.json() == {'detail': 'User not found'}
+
+
+def test_delete_user_OK(client):
+    response = client.delete('/user/1')  # Act
+
+    user_deleted = UserPublic(id=1, username='testname', email='testemail@email.com')
+
+    assert response.status_code == HTTPStatus.OK
+    assert response.json() == {
+        'message': f'User [{user_deleted.username}] with id {user_deleted.id} deleted'
+    }
+
+
+def test_delete_user_NOT_FOUND(client):
+    response = client.delete('/user/2')  # Act
 
     assert response.status_code == HTTPStatus.NOT_FOUND
     assert response.json() == {'detail': 'User not found'}
